@@ -18,26 +18,12 @@ import com.example.android_stopwatch.databinding.ActivityMainBinding
 const val CHANNEL_ID = "org.example"
 const val NOTIFICATION_ID = 393939
 
+@Suppress("UNUSED_PARAMETER")
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var notificationManager: NotificationManager
     private val colors = arrayOf(Color.RED, Color.GREEN, Color.BLUE)
     private var color = colors[0]
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        binding.startButton.setOnClickListener(::startTimer)
-        binding.resetButton.setOnClickListener(::resetTimer)
-        binding.settingsButton.setOnClickListener(::settingsClick)
-        binding.progressBar.visibility = View.INVISIBLE
-
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        registerNotificationChannel()
-    }
 
     private var secondsPassed = 0
     private val timeString: String
@@ -66,11 +52,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * When the app is first opened, the onCreate method is called. This method is used to
+     * initialize the app. In this case, we are setting up the UI, and setting up the
+     * notification channel.
+     * @param savedInstanceState The saved state of the app, if any
+     * @see getSystemService For more information on getting the notification manager
+     */
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.startButton.setOnClickListener(::startTimer)
+        binding.resetButton.setOnClickListener(::resetTimer)
+        binding.settingsButton.setOnClickListener(::settingsClick)
+        binding.progressBar.visibility = View.INVISIBLE
+
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        registerNotificationChannel()
+    }
+
+    /**
+     * This method is called when the app is opened from the notification. It is used to set the
+     * text of the timer to the correct value
+     */
     override fun onEnterAnimationComplete() {
         super.onEnterAnimationComplete()
         binding.textView.text = timeString
     }
 
+    /**
+     * Start the timer when the start button is clicked.
+     * @param view The view that was clicked
+     */
     private fun startTimer(view: View) {
         if (!timerIsOn) {
             timerIsOn = true
@@ -80,6 +96,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Reset the timer when the reset button is clicked.
+     * @param view The view that was clicked
+     */
     private fun resetTimer(view: View) {
         timerIsOn = false
         binding.progressBar.visibility = View.INVISIBLE
@@ -92,6 +112,10 @@ class MainActivity : AppCompatActivity() {
         notificationManager.cancel(NOTIFICATION_ID)
     }
 
+    /**
+     * Show the settings dialog to set the limit for the timer.
+     * @param view The view that was clicked
+     */
     private fun settingsClick(view: View) {
         val contentView = LayoutInflater.from(this)
             .inflate(R.layout.settings_dialog, null, false)
@@ -106,11 +130,19 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * When the app is closed, the onDestroy method is called. This method is used to remove the
+     * timer callback, so that the timer stops running when the app is closed.
+     */
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(timerTick)
     }
 
+    /**
+     * Create the notification channel for the app. This is required for Android 8.0 and above.
+     * @see NotificationChannel For more information on notification channels
+     */
     private fun registerNotificationChannel() {
         val name = getString(R.string.notification_channel)
         val descriptionText = getString(R.string.notification_channel_description)
@@ -121,6 +153,10 @@ class MainActivity : AppCompatActivity() {
         notificationManager.createNotificationChannel(channel)
     }
 
+    /**
+     * Show a notification when the timer reaches the time limit.
+     * @see NotificationCompat.Builder For more information on building notifications
+     */
     private fun showNotification() {
         val intent = Intent(this, MainActivity::class.java)
         val pIntent = PendingIntent.getActivity(
@@ -138,7 +174,6 @@ class MainActivity : AppCompatActivity() {
             .setAutoCancel(true)
             .setContentIntent(pIntent)
             .setOnlyAlertOnce(true)
-
         // There should be no notification sent if the time limit is negative
         if (timeLimit > 0) {
             val notification = notificationBuilder.build()
