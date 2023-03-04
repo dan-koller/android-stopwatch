@@ -28,8 +28,7 @@ _Note that the app targets Android 12 (API level 31). The minimum SDK version is
 
 ## Technologies
 
-The app is written in Kotlin and uses the Android SDK. Testing is done with Roboelectric and JUnit.
-The tests were written by JetBrains.
+The app is written in Kotlin and uses the Android SDK.
 
 ## License
 
